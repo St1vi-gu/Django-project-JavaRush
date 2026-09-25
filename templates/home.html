@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Товары{% endblock %}
+
+{% block content %}
+<section class="hero-banner">
+    <img src="{% static 'img/background/hopfen-fields.jpg' %}" alt="Хмелевое поле" class="hero-banner__image">
+    <div class="hero-banner__overlay"></div>
+</section>
+
+<div class="container main-content-grid">
+    <aside class="sidebar filter-menu">
+        <form method="get">
+            {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+            <input type="hidden" name="sort" value="{{ current_sort }}">
+
+            <div class="sidebar__section">
+                <h3 class="section-title">Категории</h3>
+                <div class="checkbox-group">
+                    {% for category in categories %}
+                        <label class="checkbox-container">{{ category.name }}
+                            <input type="checkbox" name="category" value="{{ category.slug }}"
+                                   {% if category.slug in selected_categories %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                        </label>
+                    {% empty %}
+                        <p>Категории пока не добавлены.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="button button--primary">Применить</button>
+        </form>
+    </aside>
+
+    <section class="products-area product-grid-section">
+        <form method="get" class="search-sort-bar">
+            {% for category_slug in selected_categories %}
+                <input type="hidden" name="category" value="{{ category_slug }}">
+            {% endfor %}
+            <div class="search-input-wrapper">
+                <input type="text" name="q" value="{{ query }}" placeholder="Поиск" class="search-input">
+                <button type="submit" class="search-button" aria-label="Найти">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+            <div class="sort-options">
+                <button type="submit" name="sort" value="new" class="sort-button{% if current_sort == 'new' %} active-sort{% endif %}">Новые</button>
+                <button type="submit" name="sort" value="price_asc" class="sort-button{% if current_sort == 'price_asc' %} active-sort{% endif %}">Сначала дешевле</button>
+                <button type="submit" name="sort" value="price_desc" class="sort-button{% if current_sort == 'price_desc' %} active-sort{% endif %}">Сначала дороже</button>
+                <button type="submit" name="sort" value="rating" class="sort-button{% if current_sort == 'rating' %} active-sort{% endif %}">По рейтингу</button>
+            </div>
+        </form>
+
+        <div class="product-grid">
+            {% for product in products %}
+                <a href="{{ product.get_absolute_url }}" class="product-card-link">
+                    <article class="product-card">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card__image">
+                        {% endif %}
+                        <div class="product-card__info">
+                            <h2 class="product-card__name">{{ product.name }}</h2>
+                            <p class="product-card__price">${{ product.price }}</p>
+                            <p class="product-card__description">{{ product.description|truncatechars:80 }}</p>
+                        </div>
+                    </article>
+                </a>
+            {% empty %}
+                <p>Товары пока не добавлены.</p>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+            <nav class="pagination" aria-label="Навигация по страницам">
+                {% if page_obj.has_previous %}
+                    <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" class="pagination__link pagination__link--prev">
+                        <i class="fa-solid fa-arrow-left"></i><span>Назад</span>
+                    </a>
+                {% endif %}
+
+                <div class="pagination-list">
+                    {% for page_number in paginator.page_range %}
+                        <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_number }}"
+                           class="pagination__link{% if page_number == page_obj.number %} active{% endif %}">{{ page_number }}</a>
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.has_next %}
+                    <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}" class="pagination__link pagination__link--next">
+                        <span>Вперёд</span><i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %} Register | Hop & Barley {% endblock %}
+
+{% block content %}
+
+    <div class="auth-background">
+        <img src="../static/img/background/pattern.jpg" alt="Background pattern">
+    </div>
+    <div class="auth-form-container">
+        <div class="auth-container auth-container--register">
+            <div class="Legend">
+                <h1 class="auth-title">Регистрация</h1>
+            </div>
+
+            <form class="auth-form"  method="post">
+                {% csrf_token %}
+                <div class="InputField">
+                    <label for="{{ form.email.id_for_label }}">Почта</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+                <div class="InputField">
+                    <label for="{{ form.password.id_for_label }}">Пароль</label>
+                    {{ form.password }}
+                    {{ form.password.errors }}
+                </div>
+
+
+
+                <div class="ButtonGroup">
+                    <button type="submit" class="button button--primary">Зарегистрироваться</button>
+                </div>
+            </form>
+
+            <p class="auth-switch">Уже есть аккаунт ?
+                <a href="{% url 'users:login' %}">Войти</a>
+            </p>
+        </div>
+    </div>
+
+{% endblock %}
+

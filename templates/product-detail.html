@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} | Hop & Barley{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <section class="product-details-section">
+
+        <div class="product-image-container">
+            {% if product.image %}
+                <img
+                    src="{{ product.image.url }}"
+                    alt="{{ product.name }}"
+                    class="product-image"
+                >
+            {% endif %}
+        </div>
+
+        <div class="product-info-column">
+
+            <div class="product-title-price">
+
+                <h1 class="product-name">
+                    {{ product.name }}
+                </h1>
+
+                <div class="price-section">
+
+                    <span class="price-tag">
+                        {{ product.category.name }}
+                    </span>
+
+                    <p class="product-price">
+                        ${{ product.price }}
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="product-description">
+                <p>
+                    {{ product.description|linebreaksbr }}
+                </p>
+            </div>
+
+            <div class="cart-controls">
+
+                {% if product.stock > 0 %}
+
+                    <form
+                        method="post"
+                        action="{% url 'orders:cart_add' product.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <input
+                            type="number"
+                            name="quantity"
+                            value="1"
+                            min="1"
+                            max="{{ product.stock }}"
+                        >
+
+                        <button
+                            type="submit"
+                            class="button button--primary add-to-cart-button"
+                        >
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <span>Добавить в корзину</span>
+                        </button>
+
+                    </form>
+
+                {% else %}
+
+                    <p>Нет в наличии</p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="reviews-section">
+
+        <h2 class="reviews-title">
+            Последние отзывы
+        </h2>
+
+        <div class="reviews-grid">
+
+            {% for review in reviews %}
+
+                <article class="review-card">
+
+                    <div
+                        class="review-rating"
+                        aria-label="Оценка: {{ review.rating }} из 5"
+                    >
+                        <i class="fa-solid fa-star"></i>
+                        {{ review.rating }}/5
+                    </div>
+
+                    <div class="review-body">
+                        <p class="review-text">
+                            {{ review.comments }}
+                        </p>
+                    </div>
+
+                    <div class="review-author">
+                        <span class="author-name">
+                            {{ review.user.username }}
+                        </span>
+                    </div>
+
+                </article>
+
+            {% empty %}
+
+                <p>Отзывов пока нет.</p>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% if can_review %}
+
+            <div class="review-form">
+
+                <h3>Оставить отзыв</h3>
+
+                <form
+                    method="post"
+                    action="{% url 'reviews:add' product.id %}"
+                >
+
+                    {% csrf_token %}
+
+                    {{ review_form.as_p }}
+
+                    <button
+                        type="submit"
+                        class="button button--primary"
+                    >
+                        Добавить отзыв
+                    </button>
+
+                </form>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

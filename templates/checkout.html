@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Checkout | Hop & Barley{% endblock %}
+{% block content %}
+<main class="checkout-page-wrapper"><div class="checkout-container">
+<h1 class="checkout-title">Order Details</h1>
+<form method="post">{% csrf_token %}
+<section class="checkout-section"><h2 class="checkout-section__title">Shipping information</h2>
+{{ form.as_p }}</section>
+<section class="checkout-summary"><h2>Order Summary</h2>
+<p><strong>Total: ${{ cart.get_total_price }}</strong></p>
+<button class="button button--primary button--pay" type="submit">Place order</button>
+</section></form></div></main>
+{% endblock %}

@@ -1,0 +1,133 @@
+<!-- Main Content -->
+
+  {% extends 'base.html' %}
+
+{% block title %}Shopping Cart | Hop & Barley{% endblock %}
+
+{% block content %}
+
+<div class="cart-container">
+
+    <h1 class="cart-title">Shopping Cart</h1>
+
+    <div class="cart-items-list" id="cart-items-list">
+
+        {% for item in cart %}
+
+        <div class="cart-item">
+
+            {% if item.product.image %}
+            <img
+                src="{{ item.product.image.url }}"
+                alt="{{ item.product.name }}"
+                class="cart-item__image"
+            >
+            {% endif %}
+
+            <div class="cart-item__body">
+
+                <div class="cart-item__details">
+
+                    <h2 class="cart-item__name">
+                        {{ item.product.name }}
+                    </h2>
+
+                    <div class="cart-item__price-info">
+
+                        <p class="cart-item__price">
+                            ${{ item.total_price }}
+                        </p>
+
+                        <span class="cart-item__price-tag">
+                            ${{ item.price }} each
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="cart-item__actions">
+
+                    <form
+                        method="post"
+                        action="{% url 'orders:cart_update' item.product.id %}"
+                        class="cart-item__quantity-selector"
+                    >
+
+                        {% csrf_token %}
+
+                        <input
+                            type="number"
+                            name="quantity"
+                            value="{{ item.quantity }}"
+                            min="1"
+                            max="{{ item.product.stock }}"
+                            class="quantity-value-cart"
+                        >
+
+                        <button type="submit" class="button">
+                            Update
+                        </button>
+
+                    </form>
+
+                    <form
+                        method="post"
+                        action="{% url 'orders:cart_remove' item.product.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="button--remove"
+                        >
+                            Remove
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <p>Корзина пуста</p>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% if cart|length %}
+
+    <div class="cart-summary">
+
+        <div class="cart-summary__total">
+
+            <p>Total</p>
+
+            <p id="cart-total-price">
+                ${{ cart.get_total_price }}
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'orders:checkout' %}"
+            class="button button--primary button--checkout"
+        >
+            Proceed to Checkout
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}My Account | Hop & Barley{% endblock %}
+{% block content %}
+<main class="account-page-wrapper"><div class="account-container">
+<h1>My Account</h1>
+<h2>Order History</h2>
+{% for order in orders %}
+<div class="order-table-row"><span>#{{ order.id }} — {{ order.created_at|date:"d.m.Y" }}</span>
+<span>{{ order.get_status_display }}</span><strong>${{ order.total_price }}</strong></div>
+{% empty %}<p>No orders yet.</p>{% endfor %}
+<h2>Account Information</h2>
+<form method="post">{% csrf_token %}{{ form.as_p }}
+<button class="button button--primary" type="submit">Save</button></form>
+<p><a href="{% url 'users:password_change' %}">Change password</a></p>
+</div></main>
+{% endblock %}
