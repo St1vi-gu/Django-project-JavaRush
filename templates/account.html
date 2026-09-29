@@ -7,6 +7,12 @@
 {% for order in orders %}
 <div class="order-table-row"><span>#{{ order.id }} — {{ order.created_at|date:"d.m.Y" }}</span>
 <span>{{ order.get_status_display }}</span><strong>${{ order.total_price }}</strong></div>
+{% if order.payment %}<p>{{ order.payment.get_method_display }} — {% if order.payment.is_paid %}Оплачено{% else %}Ожидает оплаты{% endif %}</p>{% endif %}
+{% if order.status == 'pending' %}
+{% if order.payment and order.payment.method != 'cod' and not order.payment.is_paid %}
+<p><a href="{% url 'payments:demo' order.id %}">Перейти к оплате</a></p>{% endif %}
+<form method="post" action="{% url 'orders:cancel' order.id %}">{% csrf_token %}<button type="submit">Отменить заказ</button></form>
+{% endif %}
 {% empty %}<p>No orders yet.</p>{% endfor %}
 <h2>Account Information</h2>
 <form method="post">{% csrf_token %}{{ form.as_p }}

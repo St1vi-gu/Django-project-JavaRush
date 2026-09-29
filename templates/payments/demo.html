@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Оплата | Hop & Barley{% endblock %}
+{% block content %}
+<section class="container" style="padding: 40px 20px; max-width: 720px;">
+  <h1>Оплата</h1>
+  <p>Заказ №{{ payment.order_id }} · ${{ payment.order.total_price }}</p>
+  {% if payment.is_paid %}<p>Этот заказ уже оплачен.</p>
+  {% elif payment.order.status == 'pending' %}
+    <form method="post">{% csrf_token %}
+      <button class="button button--primary" type="submit">Подтвердить оплату</button>
+    </form>
+  {% else %}<p>Оплата недоступна для текущего статуса заказа.</p>{% endif %}
+  <p><a href="{% url 'users:account' %}">Вернуться к заказам</a></p>
+</section>
+{% endblock %}

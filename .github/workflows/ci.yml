@@ -1,0 +1,55 @@
+name: Django acceptance checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: hop_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d hop_test"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      POSTGRES_DB: hop_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: python manage.py check --settings=config.settings.test_postgres
+      - run: python manage.py makemigrations --check --dry-run --settings=config.settings.test_postgres
+      - run: python manage.py migrate --noinput --settings=config.settings.test_postgres
+      - run: python manage.py spectacular --file schema.yaml --validate --fail-on-warn --settings=config.settings.test
+      - run: python -m pytest -q --ds=config.settings.test_postgres
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openapi
+          path: schema.yaml
+  typing:
+    name: Mypy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install -r requirements.txt
+      - run: mypy .

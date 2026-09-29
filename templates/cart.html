@@ -104,6 +104,7 @@
 
 
     {% if cart|length %}
+    <form method="post" action="{% url 'orders:cart_clear' %}">{% csrf_token %}<button type="submit">Очистить корзину</button></form>
 
     <div class="cart-summary">
 

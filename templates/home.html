@@ -46,6 +46,7 @@
                 </button>
             </div>
             <div class="sort-options">
+<button type="submit" name="sort" value="popular" class="sort-button{% if current_sort == 'popular' %} active-sort{% endif %}">Популярные</button>
                 <button type="submit" name="sort" value="new" class="sort-button{% if current_sort == 'new' %} active-sort{% endif %}">Новые</button>
                 <button type="submit" name="sort" value="price_asc" class="sort-button{% if current_sort == 'price_asc' %} active-sort{% endif %}">Сначала дешевле</button>
                 <button type="submit" name="sort" value="price_desc" class="sort-button{% if current_sort == 'price_desc' %} active-sort{% endif %}">Сначала дороже</button>

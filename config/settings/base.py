@@ -10,13 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
-from pathlib import Path
-
-from django.conf.global_settings import EMAIL_BACKEND
-from dotenv import load_dotenv
 import os
+from datetime import timedelta
+from pathlib import Path
+from typing import Any
 
-load_dotenv('.env')
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent.parent.parent / '.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -27,7 +28,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-
 
 
 # Application definition
@@ -41,11 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-INSTALLED_APPS +=  [
+INSTALLED_APPS += [
     'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',
-    'api',
+    'django_filters',
 ]
 
 INSTALLED_APPS += [
@@ -54,12 +54,9 @@ INSTALLED_APPS += [
     'reviews',
     'products',
     'payments',
-
 ]
 
 
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 DEFAULT_FROM_EMAIL = 'shop@hopandbarley.local'
 LOGIN_URL = 'users:login'
 
@@ -95,7 +92,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
@@ -120,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = 'Europe/Tallinn'
 
 USE_I18N = True
 
@@ -143,13 +139,46 @@ MEDIA_URL = '/media/'
 
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 10,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
 }
-SPECTACULAR_SETTINGS = {"TITLE": "Hop & Barley API", "VERSION": "1.0.0"}
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+SPECTACULAR_SETTINGS: dict[str, Any] = {'TITLE': 'Hop & Barley API', 'VERSION': '1.0.0'}
+SPECTACULAR_SETTINGS['ENUM_NAME_OVERRIDES'] = {
+    'PaymentMethodEnum': 'payments.models.Payment.Method',
+}
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+REST_FRAMEWORK['DEFAULT_FILTER_BACKENDS'] = [
+    'django_filters.rest_framework.DjangoFilterBackend',
+    'rest_framework.filters.SearchFilter',
+    'rest_framework.filters.OrderingFilter',
+]
+
+
+# Demo payments never collect bank details or contact a payment provider.
+PAYMENT_DEMO_ENABLED = os.getenv('PAYMENT_DEMO_ENABLED', 'false').lower() == 'true'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'shop@hopandbarley.local')
+
+MAILERS: dict[str, dict[str, Any]] = {
+    'default': {
+        'BACKEND': os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend'),
+    }
+}
+if MAILERS['default']['BACKEND'] == 'django.core.mail.backends.smtp.EmailBackend':
+    MAILERS['default']['OPTIONS'] = {
+        'host': os.getenv('EMAIL_HOST', 'localhost'),
+        'port': int(os.getenv('EMAIL_PORT', '25')),
+        'username': os.getenv('EMAIL_HOST_USER', ''),
+        'password': os.getenv('EMAIL_HOST_PASSWORD', ''),
+        'use_tls': os.getenv('EMAIL_USE_TLS', 'false').lower() == 'true',
+        'timeout': 10,
+    }

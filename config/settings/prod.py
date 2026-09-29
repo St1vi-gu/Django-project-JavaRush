@@ -1,7 +1,6 @@
 from .base import *
 
-
-ALLOWED_HOSTS = ['example.com']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 DEBUG = False
 
 # Database
@@ -17,3 +16,5 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_PORT'),
     }
 }
+
+PAYMENT_DEMO_ENABLED = False

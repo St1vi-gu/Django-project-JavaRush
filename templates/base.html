@@ -42,7 +42,7 @@
                 <img src="{% static 'img/icons/Shopping_bag.svg' %}" alt="Shopping Cart">
             </a>
 
-                <a href="{% url 'users:logout' %}" class="button button--secondary">Выход></a>
+                <form method="post" action="{% url 'users:logout' %}">{% csrf_token %}<button type="submit" class="button button--secondary">Выход</button></form>
         </div>
         {% else %}
 

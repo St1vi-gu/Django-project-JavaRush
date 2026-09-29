@@ -1,13 +1,19 @@
 from django import forms
+from django.conf import settings
+
+from payments.models import Payment
+
 
 class CheckoutForm(forms.Form):
-    PAYMENT_CHOICES = [
-        ('debit', 'Debit card'),
-        ('wallet', 'Wallet card'),
-        ('cod', 'Cash On Delivery'),
-    ]
-    full_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'Input'}))
-    phone_number = forms.CharField(widget=forms.TextInput(attrs={'class': 'Input'}))
-    city = forms.CharField(widget=forms.TextInput(attrs={'class': 'Input'}))
-    address = forms.CharField(widget=forms.TextInput(attrs={'class': 'Input'}))
-    payment_type = forms.CharField(widget=forms.Select(choices=PAYMENT_CHOICES))
+    full_name = forms.CharField(max_length=150)
+    phone_number = forms.CharField(max_length=30)
+    city = forms.CharField(max_length=100)
+    address = forms.CharField(max_length=300)
+    payment_type = forms.ChoiceField(choices=Payment.Method.choices)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not settings.PAYMENT_DEMO_ENABLED:
+            self.fields['payment_type'] = forms.ChoiceField(
+                choices=[(Payment.Method.COD, 'Оплата при получении')]
+            )
